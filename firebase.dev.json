@@ -1,0 +1,34 @@
+{
+  "hosting": {
+    "headers": [
+      {
+        "source": "**/*",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store"
+          }
+        ]
+      }
+    ],
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      { "source": "/games/2048", "destination": "/games/2048.html" },
+      { "source": "/games/flappy-bird", "destination": "/games/flappy-bird.html" },
+      { "source": "/games/guess-the-word", "destination": "/games/guess-the-word.html" },
+      { "source": "/games/speed-typing-test", "destination": "/games/speed-typing-test.html" },
+      { "source": "/games/tic-tac-toe", "destination": "/games/tic-tac-toe.html" },
+      { "source": "/player", "destination": "/player.html" },
+      { "source": "/admin", "destination": "/admin.html" },
+      { "source": "/reader", "destination": "/reader.html" },
+      { "source": "/editor", "destination": "/editor.html" },
+      { "source": "/assistant", "destination": "/assistant.html" },
+      { "source": "**", "destination": "/index.html" }
+    ]
+  }
+}

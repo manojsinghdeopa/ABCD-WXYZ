@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <!-- Website Info  -->
+    <title>
+        Article Editor
+    </title>
+    <meta content="https://abcd-wxyz.web.app/" name="author" />
+    <meta
+        content="Article Editor is your intelligent writing companion for creating, editing, and refining content with ease. Whether you're crafting blog posts, essays, reports, or online articles, this powerful AI editor tool helps you write smarter and faster"
+        name="description" />
+    <meta
+        content="article editor, content editor, AI editor, grammar checker, blog editor, writing tool, online editor, text editor, spell checker, article writer, writing assistant, content creation, essay editor, proofreading tool, SEO editor, smart writing tool"
+        name="keywords" />
+    <!-- Website Sharable Link Info  -->
+    <meta content="Article Editor" property="og:title" />
+    <meta content="website" property="og:type" />
+    <meta content="https://abcd-wxyz.web.app/editor" property="og:url" />
+    <meta content="https://abcd-wxyz.web.app/app_cover.png" property="og:image" />
+    <meta
+        content="Article Editor is your intelligent writing companion for creating, editing, and refining content with ease. Whether you're crafting blog posts, essays, reports, or online articles, this powerful AI editor tool helps you write smarter and faster"
+        property="og:description" />
+    <!-- Website Favicon Icon -->
+    <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="editor.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <div class="editor-container">
+        <!-- title -->
+        <div class="editor-section">
+            <label class="editor-label" for="book-title" id="label-title">
+            </label>
+            <div class="editor-title" contenteditable="true" id="book-title">
+            </div>
+        </div>
+        <!-- text -->
+        <div class="editor-section">
+            <label class="editor-label" for="editor" id="label-text" style="cursor: pointer;">
+            </label>
+            <div class="editor-text-container">
+                <!-- Actual editor area -->
+                <div class="editor-text" contenteditable="true" id="editor" onkeyup="checkFirstText()">
+                </div>
+                <!-- Formatting toolbar embedded inside editor -->
+                <div class="format-buttons-inline">
+                    <input onchange="changeTextColor(this.value)" type="color" />
+                    <select onchange="changeHeading(this.value)">
+                        <option value="h1">
+                            Heading 1
+                        </option>
+                        <option value="h2">
+                            Heading 2
+                        </option>
+                        <option value="h3">
+                            Heading 3
+                        </option>
+                    </select>
+                    <select onchange="changeTextSize(this.value)">
+                        <option value="2">
+                            Normal
+                        </option>
+                        <option value="1">
+                            Small
+                        </option>
+                        <option value="3">
+                            Large
+                        </option>
+                    </select>
+                    <select onchange="changeFont(this.value)">
+                        <option value="Arial">
+                            Arial
+                        </option>
+                        <option value="Times New Roman">
+                            Times New Roman
+                        </option>
+                        <option value="Courier New">
+                            Courier New
+                        </option>
+                        <option value="Verdana">
+                            Verdana
+                        </option>
+                        <option value="Georgia">
+                            Georgia
+                        </option>
+                    </select>
+                    <button onclick="execCommand('bold')">
+                        <b>
+                            B
+                        </b>
+                    </button>
+                    <button onclick="execCommand('italic')">
+                        <i>
+                            I
+                        </i>
+                    </button>
+                    <button onclick="execCommand('underline')">
+                        <u>
+                            U
+                        </u>
+                    </button>
+                    <button onclick="execCommand('justifyLeft')">
+                        Left
+                    </button>
+                    <button onclick="execCommand('justifyCenter')">
+                        Center
+                    </button>
+                    <button onclick="execCommand('justifyRight')">
+                        Right
+                    </button>
+                    <button onclick="execCommand('insertOrderedList')">
+                        OL
+                    </button>
+                    <button onclick="execCommand('insertUnorderedList')">
+                        UL
+                    </button>
+                    <button onclick="insertLink()">
+                        Link
+                    </button>
+                    <button onclick="insertImage()">
+                        Image
+                    </button>
+                    <button onclick="insertHorizontalRule()">
+                        Line
+                    </button>
+                    <button onclick="undo()">
+                        &larrhk;
+                    </button>
+                    <button onclick="redo()">
+                        &rarrhk;
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- icon -->
+        <div class="editor-section">
+            <label class="editor-label" for="book-cover" id="label-icon">
+            </label>
+            <input accept="image/*" id="book-cover" onchange="handleCoverPhoto(event)" type="file" />
+            <div class="editor-preview" id="cover-preview">
+            </div>
+        </div>
+        <!-- content_type -->
+        <div class="editor-section">
+            <label class="editor-label" for="book-content-type" id="label-content-type">
+            </label>
+            <select id="book-content-type">
+                <option value="New">
+                    New
+                </option>
+            </select>
+        </div>
+        <button class="preview-button" onclick="preview()">
+            Preview
+        </button>
+    </div>
+    <div class="grid-container" id="booksGrid">
+    </div>
+    
+    <script src="editor.js" type="module"></script>
+    <script src="editor-module.js" type="module"></script>
+    
+</body>
+
+</html>

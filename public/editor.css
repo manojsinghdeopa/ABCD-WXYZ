@@ -1,0 +1,128 @@
+body {
+    padding: 5px;
+}
+
+.editor-section {
+    width: 100%;
+    margin-top: 30px;
+}
+
+.editor-label {
+    font-size: 25px;
+    color: #445F87;
+    margin-bottom: 7px;
+    display: block;
+}
+
+.editor-title {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.editor-text {
+    min-height: 400px;
+}
+
+.editor-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+
+.format-buttons {
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.format-buttons>*,
+.format-buttons button,
+.format-buttons select {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.format-buttons button:hover {
+    background-color: #eaeaea;
+}
+
+.editor-preview {
+    margin: 10px 0;
+    width: 110px;
+    height: 135px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.editor-preview img {
+    width: 100%;
+    height: 100%;
+}
+
+.preview-button {
+    background: #445F87;
+    border-radius: 5px;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    margin: 50px 0;
+}
+
+
+
+.card {
+    cursor: pointer;
+    display: flex;
+}
+
+.card * {
+    margin: 5px;
+}
+
+
+.editor-text.loading::before {
+    content: "✍️ ...";
+    display: block;
+    font-style: italic;
+    color: gray;
+    margin-bottom: 10px;
+  }
+  
+
+  .editor-text-container {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .format-buttons-inline {
+    background: #f5f5f5;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .editor-text {
+    padding: 10px;
+    min-height: 300px;
+    outline: none;
+  }
+  

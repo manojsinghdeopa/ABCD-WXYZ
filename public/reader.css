@@ -1,0 +1,42 @@
+
+
+body {
+    margin: 0;
+    padding: 10px;
+}
+
+
+.bell-button,
+.share-button {
+    display: none;
+}
+
+.share-button {
+    margin-top: 50px;
+    margin-bottom: 25px;
+    background: #445F87;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+}
+
+
+.bell-button {
+    background: silver;
+    border: none;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+}
+
+
+
+.card {
+    margin-top: 15px;
+}
+
+.card p {
+    color: #445F87;
+}
+
+

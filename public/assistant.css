@@ -1,0 +1,74 @@
+body {
+  margin: 0;
+  padding: 10px;
+}
+
+h2 {
+  color: #445F87;
+  margin-left: 5px;
+  margin-top: 25px;
+  margin-bottom: 15px;
+}
+
+
+#prompt {
+  margin-top: 25px;
+  margin-bottom: 35px;
+  padding: 10px;
+  width: 100%;
+}
+
+button {
+  padding: 10px 16px;
+  background: #445F87;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+
+blockquote {
+  margin: 0;
+}
+
+.history-item {
+  padding: 8px;
+}
+
+.history-item.model-role {
+  color: #445F87;
+}
+
+
+.history-item>blockquote {
+  flex-grow: 1;
+  margin: 0;
+}
+
+
+.loading::after {
+  content: 'Writing...';
+  margin: 32px 0;
+}
+
+.loading {
+  opacity: 0.5;
+}
+
+.error {
+  color: red;
+}
+
+
+img.thumb {
+  border: 1px solid grey;
+  border-radius: 8px;
+  height: 100px;
+  margin: 0px 16px 16px 0;
+  padding: 2px;
+  width: 100px;
+}
+
+#file {
+  flex-grow: 0;
+}

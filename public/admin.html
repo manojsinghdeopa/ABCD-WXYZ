@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Website Info  -->
+    <title>Admin Panel abcd-wxyz</title>
+    <meta name="author" content="abcd">
+    <meta name="description" content="Read, Write & Share Articles">
+    <meta name="keywords" content="read articles, write articles, share articles">
+    <!-- Website Sharable Link Info  -->
+    <meta property="og:title" content="abcd-wxyz">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://abcd-wxyz.web.app/">
+    <meta property="og:description" content="Read, Write & Share Articles.">
+
+    <!-- Website Favicon Icon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+    <script type="module" src="./firebase.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 1rem;
+        }
+
+        .book {
+            background: #fff;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .book-details {
+            flex: 1;
+        }
+
+        .actions button {
+            margin-left: 0.5rem;
+            padding: 0.3rem 0.6rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-complete {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-copy {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-loadmore {
+            background: #6c757d;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .update-section {
+            background: #fff;
+            padding: 1rem;
+            margin-top: 2rem;
+            border-radius: 6px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .logout-btn {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loadingOverlay">⏳ Verifying access...</div>
+
+    <header>
+        <h1>Admin Panel</h1>
+        <button id="logoutBtn" class="logout-btn hidden">Logout</button>
+    </header>
+
+    <!-- Login Section -->
+    <div class="container" id="login-section">
+        <h2>Enter Admin UID</h2>
+        <input type="text" id="adminUidInput" placeholder="Enter your UID" style="width:100%;padding:0.5rem;">
+        <button id="loginBtn" style="margin-top:1rem;padding:0.5rem 1rem;">Login</button>
+        <p id="loginStatus" style="color:red;"></p>
+    </div>
+
+    <!-- Admin Tools Section -->
+    <div class="container hidden" id="admin-section">
+        <h2>Books in Review</h2>
+        <div id="books-list">Loading...</div>
+        <button id="loadMoreBtn" class="btn-loadmore hidden">Load More</button>
+
+        <div class="update-section">
+            <h2>Increment Bells for All Unreviewed Books</h2>
+            <input type="number" id="bellsInput" placeholder="Enter bells to add" />
+            <button id="updateBellsBtn">Increment Bells</button>
+            <div id="bellsStatus" class="progress"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, collection, query, where, orderBy, limit, startAfter, getDocs, doc, getDoc, updateDoc, deleteDoc, increment } from './firebase.js';
+
+        let lastVisible = null;
+        let loadingBooks = false;
+
+        // --- Show/hide loading overlay ---
+        function showLoading(msg = "Loading...") {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.textContent = msg;
+            overlay.style.display = 'flex';
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // --- Auto-login check ---
+        const savedUid = localStorage.getItem('admin_uid');
+        if (savedUid) {
+            showLoading("⏳ Verifying access...");
+            verifyAdmin(savedUid, true);
+        } else {
+            hideLoading();
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const enteredUid = document.getElementById('adminUidInput').value.trim();
+            if (!enteredUid) {
+                document.getElementById('loginStatus').textContent = "Please enter a UID.";
+                return;
+            }
+            showLoading("⏳ Verifying access...");
+            verifyAdmin(enteredUid, false);
+        });
+
+        async function verifyAdmin(uid, silentLogin) {
+            try {
+                const adminDoc = await getDoc(doc(db, 'admins', uid));
+                if (adminDoc.exists()) {
+                    localStorage.setItem('admin_uid', uid);
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('admin-section').classList.remove('hidden');
+                    document.getElementById('logoutBtn').classList.remove('hidden');
+                    hideLoading();
+                    loadBooksInReview();
+                } else {
+                    if (silentLogin) {
+                        localStorage.removeItem('admin_uid');
+                        hideLoading();
+                        document.getElementById('login-section').classList.remove('hidden');
+                    } else {
+                        hideLoading();
+                        document.getElementById('loginStatus').textContent = "Access Denied: Invalid UID";
+                    }
+                }
+            } catch {
+                hideLoading();
+                if (!silentLogin) {
+                    document.getElementById('loginStatus').textContent = "Error verifying UID.";
+                }
+            }
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('admin_uid');
+            location.reload();
+        });
+
+        // --- Load books in review with pagination ---
+        async function loadBooksInReview() {
+            if (loadingBooks) return;
+            loadingBooks = true;
+
+            const booksList = document.getElementById('books-list');
+            if (!lastVisible) booksList.innerHTML = 'Loading...';
+
+            try {
+                const q = lastVisible
+                    ? query(collection(db, 'books'), where('in_review', '==', true), orderBy('created_at', 'desc'), startAfter(lastVisible), limit(10))
+                    : query(collection(db, 'books'), where('in_review', '==', true), orderBy('created_at', 'desc'), limit(10));
+
+                const snapshot = await getDocs(q);
+                if (!lastVisible) booksList.innerHTML = '';
+
+                if (snapshot.empty) {
+                    if (!lastVisible) booksList.innerHTML = '<p>No books in review.</p>';
+                    document.getElementById('loadMoreBtn').classList.add('hidden');
+                    loadingBooks = false;
+                    return;
+                }
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    let createdAtText = 'Unknown';
+                    if (data.created_at) {
+                        if (data.created_at.toDate) {
+                            createdAtText = data.created_at.toDate().toLocaleString();
+                        } else {
+                            createdAtText = new Date(data.created_at).toLocaleString();
+                        }
+                    }
+
+                    const bookDiv = document.createElement('div');
+                    bookDiv.className = 'book';
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'book-details';
+                    detailsDiv.innerHTML = `<strong>${data.title || 'Untitled'}</strong><br>
+                                    Created At: ${createdAtText}<br>
+                                    Bells: ${data.bells || 0}`;
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'actions';
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn-copy';
+                    copyBtn.innerHTML = '📋';
+                    copyBtn.onclick = () => {
+                        const basePath = window.location.origin + '/';
+                        const titleForUrl = (data.title || 'Untitled').trim().replace(/\s+/g, '-');
+                        const link = `${basePath}reader?title=${titleForUrl}&id=${docSnap.id}`;
+                        navigator.clipboard.writeText(link).then(() => {
+                            copyBtn.textContent = '✅';
+                            setTimeout(() => (copyBtn.textContent = '📋'), 1500);
+                            window.open(link, '_blank');
+                        });
+                    };
+
+                    const completeBtn = document.createElement('button');
+                    completeBtn.className = 'btn-complete';
+                    completeBtn.textContent = 'Review Complete';
+                    completeBtn.onclick = async () => {
+                        await updateDoc(doc(db, 'books', docSnap.id), { in_review: false });
+                        bookDiv.remove();
+                    };
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn-delete';
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = async () => {
+                        if (confirm('Delete this book?')) {
+                            await deleteDoc(doc(db, 'books', docSnap.id));
+                            bookDiv.remove();
+                        }
+                    };
+
+                    actionsDiv.appendChild(copyBtn);
+                    actionsDiv.appendChild(completeBtn);
+                    actionsDiv.appendChild(deleteBtn);
+                    bookDiv.appendChild(detailsDiv);
+                    bookDiv.appendChild(actionsDiv);
+                    booksList.appendChild(bookDiv);
+                });
+
+                lastVisible = snapshot.docs[snapshot.docs.length - 1];
+                document.getElementById('loadMoreBtn').classList.remove('hidden');
+            } catch (err) {
+                booksList.innerHTML = `<p style="color:red;">Error loading books: ${err}</p>`;
+            }
+            loadingBooks = false;
+        }
+
+        document.getElementById('loadMoreBtn').addEventListener('click', loadBooksInReview);
+
+        // --- Increment Bells only for unreviewed books ---
+        document.getElementById('updateBellsBtn').addEventListener('click', async () => {
+            const bellsValue = parseInt(document.getElementById('bellsInput').value);
+            const statusEl = document.getElementById('bellsStatus');
+
+            if (isNaN(bellsValue)) {
+                statusEl.textContent = 'Please enter a valid number.';
+                return;
+            }
+
+            statusEl.textContent = 'Incrementing bells for unreviewed books in batches...';
+            let totalProcessed = 0;
+            let errors = 0;
+            let lastDoc = null;
+
+            try {
+                while (true) {
+                    const q = lastDoc
+                        ? query(collection(db, 'books'), where('in_review', '==', true), startAfter(lastDoc), limit(20))
+                        : query(collection(db, 'books'), where('in_review', '==', true), limit(20));
+
+                    const snapshot = await getDocs(q);
+                    if (snapshot.empty) break;
+
+                    await Promise.allSettled(snapshot.docs.map(docSnap =>
+                        updateDoc(doc(db, 'books', docSnap.id), { bells: increment(bellsValue) })
+                            .then(() => totalProcessed++)
+                            .catch(() => errors++)
+                    ));
+
+                    lastDoc = snapshot.docs[snapshot.docs.length - 1];
+                    statusEl.textContent = `Processed ${totalProcessed} books. Errors: ${errors}`;
+                }
+                statusEl.textContent += ' - Done!';
+            } catch (err) {
+                statusEl.textContent = 'Error incrementing bells: ' + err;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
