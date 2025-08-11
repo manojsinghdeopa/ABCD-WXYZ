@@ -101,28 +101,28 @@ body {
     font-style: italic;
     color: gray;
     margin-bottom: 10px;
-  }
-  
+}
 
-  .editor-text-container {
+
+.editor-text-container {
     border: 1px solid #ccc;
     border-radius: 6px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-  }
-  
-  .format-buttons-inline {
+}
+
+.format-buttons-inline {
     background: #f5f5f5;
     padding: 8px;
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-  }
-  
-  .editor-text {
+}
+
+.editor-text {
     padding: 10px;
     min-height: 300px;
     outline: none;
-  }
-  
+}
+

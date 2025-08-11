@@ -112,21 +112,32 @@ export async function updateUI(resultEl, getResult, streaming) {
 
 }
 
-export async function streamGenerateText(prompt, onChunk) {
 
+export async function streamGenerateText(prompt, onChunk) {
   const genAI = new GoogleGenerativeAI(API_KEY);
   const model = genAI.getGenerativeModel({ model: AI_MODEL });
 
   const result = await model.generateContentStream(prompt);
   const stream = result.stream;
 
+  let buffer = "";
+  let renderBuffer = "";
+
+  const typeSpeed = 77; // milliseconds per character (adjust to slow/fast)
+
+  async function typeText(newText) {
+    for (let char of newText) {
+      renderBuffer += char;
+      const html = marked.parse(renderBuffer);
+      onChunk(html);
+      await new Promise(res => setTimeout(res, typeSpeed));
+    }
+  }
+
   for await (const chunk of stream) {
     const text = chunk.text();
-
-    // Parse only the current chunk
-    const htmlChunk = marked.parse(text);
-
-    // Append parsed chunk
-    onChunk(htmlChunk);
+    buffer += text;
+    await typeText(text); // type chunk slowly
   }
 }
+

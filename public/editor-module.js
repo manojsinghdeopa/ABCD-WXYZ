@@ -44,10 +44,9 @@ labelTextEl.addEventListener("click", async () => {
     editorEl.innerHTML = "";
     editorEl.classList.add("loading");
 
-    await streamGenerateText(prompt, (htmlChunk) => {
-        const wrapper = document.createElement("div");
-        wrapper.innerHTML = htmlChunk;
-        editorEl.appendChild(wrapper);
+    
+    await streamGenerateText(prompt, (html) => {
+        editorEl.innerHTML = html;
         editorEl.scrollTop = editorEl.scrollHeight;
     });
 
