@@ -22,14 +22,14 @@ function ensureSpeedControl() {
     wrapper.style.display = 'none';
 
     const label = document.createElement('span');
-    label.textContent = 'Speed:';
+    label.textContent = '⚡';
     label.style.marginRight = '6px';
 
     const select = document.createElement('select');
     select.innerHTML = `
-        <option value="120">Beginner</option>
-        <option value="70" selected>Medium</option>
-        <option value="35">Pro</option>
+        <option value="70" selected>Expert</option>
+        <option value="30">Senior</option>
+        <option value="1">Master</option>
     `;
     select.addEventListener('change', (e) => {
         setTypingSpeed(Number(e.target.value));
@@ -88,6 +88,7 @@ labelTextEl.addEventListener("click", async () => {
 
     editorEl.innerHTML = "";
     editorEl.classList.add("loading");
+    editorEl.style.paddingBottom = "25px";
     
     // Disable the label to prevent multiple clicks
     labelTextEl.style.pointerEvents = "none";
