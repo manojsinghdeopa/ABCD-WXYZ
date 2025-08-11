@@ -1,6 +1,6 @@
 import { auth, db, collection, query, where, getDocs, deleteDoc, doc, getDoc } from './firebase.js';
 import { translateText, translateTexts } from './translation-utils.js';
-import { streamGenerateText } from "./assistant-helper.js";
+import { streamGenerateText, setTypingSpeed} from "./assistant-helper.js";
 
 
 const booksCollectionRef = collection(db, 'books');
@@ -8,6 +8,52 @@ const booksGridContainer = document.querySelector('.grid-container');
 const labelTextEl = document.getElementById("label-text");
 const editorEl = document.getElementById("editor");
 const titleEl = document.getElementById("book-title");
+const editorTextContainerEl = document.querySelector('.editor-text-container');
+let speedControlEl = null;
+
+// Prepare Speed Control UI (hidden by default)
+function ensureSpeedControl() {
+    if (speedControlEl) return speedControlEl;
+    if (!editorTextContainerEl) return null;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'speed-control';
+    wrapper.setAttribute('contenteditable', 'false');
+    wrapper.style.display = 'none';
+
+    const label = document.createElement('span');
+    label.textContent = 'Speed:';
+    label.style.marginRight = '6px';
+
+    const select = document.createElement('select');
+    select.innerHTML = `
+        <option value="120">Beginner</option>
+        <option value="70" selected>Medium</option>
+        <option value="35">Pro</option>
+    `;
+    select.addEventListener('change', (e) => {
+        setTypingSpeed(Number(e.target.value));
+    });
+
+    // default speed
+    setTypingSpeed(Number(select.value));
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(select);
+    editorTextContainerEl.appendChild(wrapper);
+
+    speedControlEl = wrapper;
+    return speedControlEl;
+}
+
+function showSpeedControl() {
+    const el = ensureSpeedControl();
+    if (el) el.style.display = 'flex';
+}
+
+function hideSpeedControl() {
+    if (speedControlEl) speedControlEl.style.display = 'none';
+}
 
 
 async function fetchImageByTitle(title) {
@@ -40,26 +86,47 @@ labelTextEl.addEventListener("click", async () => {
     // const selectedLanguage = localStorage.getItem('selectedLanguage') || 'en';
     // const prompt = `Write an article about: "${title}" in this language code "${selectedLanguage}". Use the tone of a professional writer.`;
 
-
     editorEl.innerHTML = "";
     editorEl.classList.add("loading");
-
     
-    await streamGenerateText(prompt, (html) => {
-        editorEl.innerHTML = html;
-        editorEl.scrollTop = editorEl.scrollHeight;
-    });
+    // Disable the label to prevent multiple clicks
+    labelTextEl.style.pointerEvents = "none";
+    labelTextEl.style.opacity = "0.6";
+    labelTextEl.style.cursor = "not-allowed";
 
-    // Fetch and apply image
+    // Hide the format buttons toolbar
+    const formatButtonsInline = document.querySelector('.format-buttons-inline');
+    if (formatButtonsInline) formatButtonsInline.style.display = "none";
+    // Show speed control only during generation
+    showSpeedControl();
+
     try {
-        const imageUrl = await fetchImageByTitle(title);
-        document.getElementById('cover-preview').innerHTML = `<img src="${imageUrl}" alt="Cover Photo">`;
-        document.getElementById('book-cover').setAttribute('data-url', imageUrl);
-    } catch (error) {
-        console.error("Could not fetch cover image:", error);
-    }
+        await streamGenerateText(prompt, (html) => {
+            editorEl.innerHTML = html;
+            editorEl.scrollTop = editorEl.scrollHeight;
+        });
 
-    editorEl.classList.remove("loading");
+        // Fetch and apply image
+        try {
+            const imageUrl = await fetchImageByTitle(title);
+            document.getElementById('cover-preview').innerHTML = `<img src="${imageUrl}" alt="Cover Photo">`;
+            document.getElementById('book-cover').setAttribute('data-url', imageUrl);
+        } catch (error) {
+            console.error("Could not fetch cover image:", error);
+        }
+    } finally {
+        editorEl.classList.remove("loading");
+
+        // Re-enable the label after generation is complete
+        labelTextEl.style.pointerEvents = "auto";
+        labelTextEl.style.opacity = "1";
+        labelTextEl.style.cursor = "pointer";
+
+        // Show the format buttons toolbar again
+        if (formatButtonsInline) formatButtonsInline.style.display = "";
+        // Hide speed control after generation is done
+        hideSpeedControl();
+    }
 
 
 });

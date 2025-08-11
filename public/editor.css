@@ -110,6 +110,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .format-buttons-inline {
@@ -124,5 +125,26 @@ body {
     padding: 10px;
     min-height: 300px;
     outline: none;
+}
+
+/* Speed control - bottom right overlay inside editor */
+.speed-control {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+}
+
+/* Prevent the menu from messing with caret when clicked */
+.speed-control select {
+    font-size: 12px;
 }
 

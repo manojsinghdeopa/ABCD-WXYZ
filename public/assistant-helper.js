@@ -6,6 +6,25 @@ import { marked } from "https://esm.run/marked";
 const API_KEY = /* await (await fetch("API_KEY")).text() */ 'AIzaSyBkuxn-RDRAwrRKWbyl4Ef4m05aklyhSpA';
 const AI_MODEL = "gemini-2.5-flash-lite"
 
+// Typing speed state (in milliseconds per character)
+let baseTypingSpeedMs = 70; // default to Medium
+
+/**
+ * Updates the global typing speed used by stream generation.
+ * @param {number} speedMs
+ */
+export function setTypingSpeed(speedMs) {
+  baseTypingSpeedMs = Number(speedMs) || 70;
+}
+
+/**
+ * Returns the current typing speed in ms per character.
+ * @returns {number}
+ */
+export function getTypingSpeed() {
+  return baseTypingSpeedMs;
+}
+
 /**
  * Returns a model instance.
  *
@@ -113,6 +132,7 @@ export async function updateUI(resultEl, getResult, streaming) {
 }
 
 
+
 export async function streamGenerateText(prompt, onChunk) {
   const genAI = new GoogleGenerativeAI(API_KEY);
   const model = genAI.getGenerativeModel({ model: AI_MODEL });
@@ -122,22 +142,56 @@ export async function streamGenerateText(prompt, onChunk) {
 
   let buffer = "";
   let renderBuffer = "";
+  let wordBuffer = "";
 
-  const typeSpeed = 77; // milliseconds per character (adjust to slow/fast)
+  const minChunkSize = 2;
+  const maxChunkSize = 5;
+
+  // Dynamic chunk size based on speed
+  function getChunkSize() {
+    const currentSpeed = getTypingSpeed();
+    return Math.max(
+      minChunkSize,
+      Math.min(maxChunkSize, Math.round(150 / currentSpeed))
+    );
+  }
+
+  // Adds random human-like delay variation
+  function randomDelay(base) {
+    const jitter = Math.floor(Math.random() * 30) - 15; // ±15 ms variation
+    return Math.max(20, base + jitter);
+  }
 
   async function typeText(newText) {
     for (let char of newText) {
+      wordBuffer += char;
       renderBuffer += char;
-      const html = marked.parse(renderBuffer);
-      onChunk(html);
-      await new Promise(res => setTimeout(res, typeSpeed));
+
+      const isRenderPoint = /\s|[.,!?;:()\n]/.test(char);
+      const isMiniChunk = wordBuffer.length >= getChunkSize();
+
+      // Base delay
+      let delay = getTypingSpeed();
+
+      // Extra pause rules
+      if (char === "." || char === "!" || char === "?") delay += 200;
+      else if (char === ",") delay += 100;
+      else if (char === "\n") delay += 150;
+
+      if (isRenderPoint || isMiniChunk) {
+        const html = marked.parse(renderBuffer);
+        onChunk(html);
+        if (isRenderPoint) wordBuffer = "";
+      }
+
+      await new Promise(res => setTimeout(res, randomDelay(delay)));
     }
   }
 
   for await (const chunk of stream) {
     const text = chunk.text();
     buffer += text;
-    await typeText(text); // type chunk slowly
+    await typeText(text);
   }
 }
 

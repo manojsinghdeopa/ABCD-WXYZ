@@ -208,12 +208,13 @@ class ArticleDetail {
 
 
 
+
     publishArticle() {
         this.shareButton.textContent = 'Saving...';
         this.shareButton.disabled = true;
         this.addDocumentToBooksCollection();
-
     }
+
 
     async addDocumentToBooksCollection() {
         try {
@@ -229,7 +230,13 @@ class ArticleDetail {
                 in_review: true,
             });
 
-            window.location.replace('editor');
+            // Close the reader window and reload the editor page
+            if (window.opener) {
+                window.opener.location.reload();
+                window.close();
+            } else {
+                window.location.replace('editor');
+            }
 
         } catch (e) {
             this.shareButton.textContent = 'Try again';
