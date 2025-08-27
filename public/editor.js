@@ -4,7 +4,7 @@ import { translateText, translateTexts } from './translation-utils.js';
 let firstTextEntered = false;
 
 async function translateAndRevealTexts() {
-    const texts = ["Title", "Logo", "Text: 👉 Click here to write with AI", "Select Category"];
+    const texts = ["Title", "Logo", "Text → click to autowrite", "Select Category"];
     const translatedTexts = await translateTexts(texts);
 
     revealText("label-title", translatedTexts[0], 50);

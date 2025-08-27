@@ -1,4 +1,4 @@
-import { auth, db, collection, query, where, getDocs, deleteDoc, doc, getDoc } from './firebase.js';
+import { db, collection, query, where, getDocs, deleteDoc, doc, getDoc } from './firebase.js';
 import { translateText, translateTexts } from './translation-utils.js';
 import { streamGenerateText, setTypingSpeed} from "./assistant-helper.js";
 
