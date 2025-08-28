@@ -1,6 +1,6 @@
 import { db, collection, query, where, getDocs, deleteDoc, doc, getDoc } from './firebase.js';
 import { translateText, translateTexts } from './translation-utils.js';
-import { streamGenerateText, setTypingSpeed} from "./assistant-helper.js";
+import { streamGenerateText, setTypingSpeed } from "./assistant-helper.js";
 
 
 const booksCollectionRef = collection(db, 'books');
@@ -71,6 +71,114 @@ async function fetchImageByTitle(title) {
 }
 
 
+function getPrompt(title) {
+    // Pick a random flavor , OKKKKKKK !
+    const styles = [
+        "plain",
+        "comedy",
+        "sarcastic",
+        "motivational",
+        "storytelling",
+        "funnyRealistic",
+        "emotional",
+        "practical",
+        "rant",
+        "wholesome"
+    ];
+    const style = styles[Math.floor(Math.random() * styles.length)];
+
+    switch (style) {
+        case "comedy":
+            return `
+Write an article about: ${title}.
+Make it sound human, not AI.
+Keep it simple, humble, and relatable.
+Add light comedy and humor where natural.
+Avoid fancy or complex words.
+Make it feel like a casual conversation with a friend.
+Use short sentences and real-life examples.
+`;
+
+        case "sarcastic":
+            return `
+Write an article about: ${title}.
+Make it funny in a sarcastic, witty way (like stand-up comedy).
+Use humor about daily struggles, small annoyances, and life’s ironies.
+Keep the language simple and relatable, no big words.
+Sound like a human joking with friends, not an AI.
+`;
+
+        case "motivational":
+            return `
+Write an article about: ${title}.
+Make it sound uplifting and positive, but in simple words.
+No big or poetic vocabulary.
+Make it humble and relatable, like friendly encouragement.
+Give small, practical examples anyone can connect to.
+`;
+
+        case "storytelling":
+            return `
+Write an article about: ${title}.
+Write it like a short personal story or diary entry.
+Keep the tone human, warm, and real.
+Simple words, relatable situations, small details from daily life.
+`;
+
+        case "funnyRealistic":
+            return `
+Write an article about: ${title}.
+Make it humorous but realistic, like everyday struggles we all face.
+Keep it light, casual, and human.
+Avoid big words, just use relatable funny examples from daily life.
+`;
+
+        case "emotional":
+            return `
+Write an article about: ${title}.
+Make it emotional and heart-touching.
+Use a warm, gentle, human tone.
+Keep it simple and humble, no heavy or poetic words.
+Write it like a person opening up honestly about life.
+`;
+
+        case "practical":
+            return `
+Write an article about: ${title}.
+Make it sound like useful advice from a friend.
+Keep it human, simple, and easy to follow.
+Give clear, everyday examples and practical tips people can apply.
+`;
+
+        case "rant":
+            return `
+Write an article about: ${title}.
+Make it sound like a casual rant — honest, a little funny, and very human.
+Use simple words, small complaints, and relatable frustrations.
+Make the tone like someone talking freely with a friend.
+`;
+
+        case "wholesome":
+            return `
+Write an article about: ${title}.
+Make it cozy, warm, and comforting.
+Simple words, soft tone, and relatable feelings.
+Make it sound like a caring friend reminding you of the small joys of life.
+`;
+
+        default: // plain
+            return `
+Write an article about: ${title}.
+Write it in a natural, human tone.
+Keep it simple, humble, and relatable.
+Avoid fancy or complex words.
+Make it sound like everyday writing, as if a person is sharing their thoughts.
+Use short sentences and clear examples.
+`;
+    }
+}
+
+
 
 
 labelTextEl.addEventListener("click", async () => {
@@ -81,15 +189,15 @@ labelTextEl.addEventListener("click", async () => {
         return;
     }
 
-    const prompt = `Write an article about: ${title}`;
-
+    // const prompt = `Write an article about: ${title}`;
     // const selectedLanguage = localStorage.getItem('selectedLanguage') || 'en';
     // const prompt = `Write an article about: "${title}" in this language code "${selectedLanguage}". Use the tone of a professional writer.`;
 
+    const prompt = getPrompt(title);
     editorEl.innerHTML = "";
     editorEl.classList.add("loading");
     editorEl.style.paddingBottom = "25px";
-    
+
     // Disable the label to prevent multiple clicks
     labelTextEl.style.pointerEvents = "none";
     labelTextEl.style.opacity = "0.6";
